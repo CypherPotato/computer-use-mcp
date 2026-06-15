@@ -1,9 +1,9 @@
 {
-  "name": "computer-use-mcp",
+  "name": "@cypherpotato/computer-use-mcp",
   "version": "1.8.0",
   "description": "💻 MCP server for Claude to control your computer",
   "license": "MIT",
-  "author": "Adam Jones (domdomegg)",
+  "author": "Gabriel Scatolin (CypherPotato), Adam Jones (domdomegg)",
   "repository": {
     "type": "git",
     "url": "https://github.com/domdomegg/computer-use-mcp.git"
@@ -24,15 +24,18 @@
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "lint": "eslint",
     "clean": "rm -rf dist",
-    "build": "tsc --project tsconfig.build.json",
+    "build": "tsc --project tsconfig.build.json && node -e \"require('node:fs').copyFileSync('src/overlayProcess.cjs','dist/overlayProcess.cjs')\"",
     "build:mcpb": "./build-mcpb.sh",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.3",
     "@nut-tree-fork/nut-js": "^4.2.6",
+    "electron": "^42.3.3",
     "express": "^5.1.0",
+    "get-windows": "^9.3.0",
     "sharp": "^0.34.5",
+    "uiohook-napi": "^1.5.5",
     "zod": "^4.1.13"
   },
   "devDependencies": {

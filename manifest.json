@@ -23,8 +23,20 @@
   },
   "tools": [
     {
-      "name": "computer",
-      "description": "Use a computer to complete tasks. This tool can take screenshots, click, type, scroll, and more."
+      "name": "get_context",
+      "description": "Inspect monitors, visible windows, system time, and cursor position."
+    },
+    {
+      "name": "focus_window",
+      "description": "Bring a visible desktop window to the foreground by PID or name."
+    },
+    {
+      "name": "computer_toggle_session",
+      "description": "Start or end a visible computer-control session."
+    },
+    {
+      "name": "computer_use",
+      "description": "Run ordered desktop actions in an active computer-control session, including screenshots, clicks, typing, scrolling, and sleep."
     }
   ],
   "compatibility": {
