@@ -1,22 +1,22 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.domdomegg/computer-use-mcp",
+  "name": "io.github.CypherPotato/computer-use-mcp",
   "title": "Computer Use",
-  "description": "Control your computer with screenshots, mouse, and keyboard automation.",
-  "websiteUrl": "https://github.com/domdomegg/computer-use-mcp#readme",
+  "description": "Control your computer with screenshots, mouse, keyboard automation, explicit sessions, and structured MCP responses.",
+  "websiteUrl": "https://github.com/CypherPotato/computer-use-mcp#readme",
   "icons": [{
     "mimeType": "image/png",
-    "src": "https://raw.githubusercontent.com/domdomegg/computer-use-mcp/refs/heads/master/icon.png"
+    "src": "https://raw.githubusercontent.com/CypherPotato/computer-use-mcp/refs/heads/master/icon.png"
   }],
   "repository": {
-    "url": "https://github.com/domdomegg/computer-use-mcp.git",
+    "url": "https://github.com/CypherPotato/computer-use-mcp.git",
     "source": "github"
   },
   "version": "{{VERSION}}",
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "computer-use-mcp",
+      "identifier": "@cypherpotato/computer-use-mcp",
       "version": "{{VERSION}}",
       "runtimeHint": "npx",
       "environmentVariables": [],
@@ -26,7 +26,7 @@
     },
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/domdomegg/computer-use-mcp/releases/download/v{{VERSION}}/computer-use-mcp.mcpb",
+      "identifier": "https://github.com/CypherPotato/computer-use-mcp/releases/download/v{{VERSION}}/computer-use-mcp.mcpb",
       "version": "{{VERSION}}",
       "fileSha256": "{{MCPB_FILE_SHA256}}",
       "transport": {

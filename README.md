@@ -77,20 +77,42 @@ The server is a TypeScript Node.js MCP server. The runtime uses:
 
 ## Tools
 
+The server exposes four MCP tools. All tools return model-readable `structuredContent`; tools only include image content when they return a screenshot or post-action interaction preview.
+
 ### `get_context`
 
 Inspects desktop state without starting a control session.
 
+Input:
+
+```json
+{}
+```
+
 Returns structured content with:
 
-- System date, timezone, and platform.
-- Cursor position in global and monitor-local coordinates.
-- Monitor inventory.
-- Visible windows grouped by monitor.
+- `ok`
+- `system.date_time`, `system.timezone`, and `system.platform`
+- `cursor.global_x`, `cursor.global_y`, `cursor.monitor_id`, `cursor.x`, and `cursor.y`
+- `monitors[]` with `index`, `monitor_id`, `bounds`, `windows[]`, and optional `windows_error`
 
 ### `focus_window`
 
-Brings a visible desktop window to the foreground by process ID or by a case-insensitive name/title match.
+Brings a visible desktop window to the foreground by process ID or by a case-insensitive name/title match. Provide at least one of `pid` or `name`.
+
+Input:
+
+```json
+{
+  "pid": 1234,
+  "name": "Code"
+}
+```
+
+Returns structured content with:
+
+- `ok`
+- `focused`
 
 Platform behavior:
 
@@ -100,16 +122,33 @@ Platform behavior:
 
 ### `computer_toggle_session`
 
-Starts or ends a computer-control session.
+Starts or ends a computer-control session. A session must be active before `computer_use` can run desktop actions.
 
-`start` returns:
+Start input:
 
-- `session_id`
-- monitor inventory
-- visible applications
-- overlay/input-monitor status
+```json
+{
+  "action": "start"
+}
+```
 
-`end` requires the active `session_id`.
+End input:
+
+```json
+{
+  "action": "end",
+  "session_id": "session-id-from-start"
+}
+```
+
+`start` returns structured content with:
+
+- `ok`
+- `status`: `started` or `already_active`
+- `session`, including `session.session_id`, `started_at`, `status`, `monitors`, and input-monitor status
+- `monitors`, including visible applications per monitor
+
+`end` requires the active `session_id` and returns `status: "ended"` when successful. Invalid or inactive calls return `status: "invalid_session"`, `status: "inactive"`, or `status: "ended"` depending on the current lifecycle state.
 
 The user can also end a session with Escape or the overlay stop control.
 
@@ -122,9 +161,24 @@ Top-level input:
 ```json
 {
   "session_id": "session-id-from-computer_toggle_session",
-  "actions": []
+  "actions": [
+    {
+      "action": "get_screenshot",
+      "monitor_id": "monitor-id"
+    }
+  ]
 }
 ```
+
+`actions` must contain 1 to 50 items. The runtime serializes the array and inserts a 250 ms delay between actions.
+
+Action item fields:
+
+- `action`: one of the supported action names below.
+- `monitor_id`: required for screenshots and coordinate-based actions.
+- `coordinate`: `[x, y]` in the selected monitor screenshot coordinate space.
+- `text`: text to type, key command, or scroll direction.
+- `duration_ms`: required only for `sleep`; integer from 0 to 60000.
 
 Supported actions:
 
@@ -132,10 +186,10 @@ Supported actions:
 | --- | --- | --- |
 | `get_screenshot` | `monitor_id` | Captures the selected monitor and returns image content plus structured metadata. |
 | `mouse_move` | `monitor_id`, `coordinate` | Moves the cursor to monitor-local screenshot coordinates. |
-| `left_click` | optional `monitor_id`, optional `coordinate` | Left-clicks at a coordinate or current cursor. |
-| `double_click` | optional `monitor_id`, optional `coordinate` | Double-clicks at a coordinate or current cursor. |
-| `right_click` | optional `monitor_id`, optional `coordinate` | Right-clicks at a coordinate or current cursor. |
-| `middle_click` | optional `monitor_id`, optional `coordinate` | Middle-clicks at a coordinate or current cursor. |
+| `left_click` | optional `monitor_id` and `coordinate` | Left-clicks at a coordinate or current cursor. |
+| `double_click` | optional `monitor_id` and `coordinate` | Double-clicks at a coordinate or current cursor. |
+| `right_click` | optional `monitor_id` and `coordinate` | Right-clicks at a coordinate or current cursor. |
+| `middle_click` | optional `monitor_id` and `coordinate` | Middle-clicks at a coordinate or current cursor. |
 | `left_click_drag` | `monitor_id`, `coordinate` | Drags with the left mouse button from the current cursor to a coordinate. |
 | `right_click_drag` | `monitor_id`, `coordinate` | Drags with the right mouse button from the current cursor to a coordinate. |
 | `scroll` | `monitor_id`, `coordinate`, `text` | Scrolls from a coordinate. `text` supports `up`, `down`, `left`, `right`, or `direction:amount`. |
@@ -152,6 +206,8 @@ Supported actions:
 - `steps`
 - optional `interaction_preview`
 
+Invalid or ended sessions return structured lifecycle status instead of running actions.
+
 ## Prerequisites
 
 - Node.js LTS or newer.
@@ -167,7 +223,7 @@ On macOS, you may need to grant the terminal or AI client Accessibility and Scre
 ### Claude Code
 
 ```bash
-claude mcp add --scope user --transport stdio computer-use -- npx -y computer-use-mcp
+claude mcp add --scope user --transport stdio computer-use -- npx -y @cypherpotato/computer-use-mcp@1.8.0
 ```
 
 This installs the server at user scope. To install it only for the current directory, omit `--scope user`.
@@ -176,7 +232,7 @@ This installs the server at user scope. To install it only for the current direc
 
 Recommended MCPB installation:
 
-1. Open the latest successful run in the [GitHub Actions history](https://github.com/domdomegg/computer-use-mcp/actions/workflows/ci.yaml?query=branch%3Amaster).
+1. Open the latest successful run in the [GitHub Actions history](https://github.com/CypherPotato/computer-use-mcp/actions/workflows/ci.yaml?query=branch%3Amaster).
 2. Download the `computer-use-mcp-mcpb` artifact.
 3. Rename the downloaded `.zip` file to `.mcpb`.
 4. Double-click the `.mcpb` file to open it in Claude Desktop.
@@ -189,7 +245,7 @@ Manual JSON configuration:
   "mcpServers": {
     "computer-use": {
       "command": "npx",
-      "args": ["-y", "computer-use-mcp"]
+      "args": ["-y", "@cypherpotato/computer-use-mcp@1.8.0"]
     }
   }
 }
@@ -199,7 +255,7 @@ Manual JSON configuration:
 
 One-click install:
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=computer-use&config=JTdCJTIyY29tbWFuZCUyMiUzQSUyMm5weCUyMC15JTIwY29tcHV0ZXItdXNlLW1jcCUyMiU3RA%3D%3D)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=computer-use&config=%7B%22command%22%3A%22npx%20-y%20%40cypherpotato%2Fcomputer-use-mcp%401.8.0%22%7D)
 
 Manual configuration in `~/.cursor/mcp.json` or `.cursor/mcp.json`:
 
@@ -208,7 +264,7 @@ Manual configuration in `~/.cursor/mcp.json` or `.cursor/mcp.json`:
   "mcpServers": {
     "computer-use": {
       "command": "npx",
-      "args": ["-y", "computer-use-mcp"]
+      "args": ["-y", "@cypherpotato/computer-use-mcp@1.8.0"]
     }
   }
 }
@@ -230,7 +286,7 @@ Manual configuration:
     "computer-use": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "computer-use-mcp"]
+      "args": ["-y", "@cypherpotato/computer-use-mcp@1.8.0"]
     }
   }
 }
@@ -239,7 +295,7 @@ Manual configuration:
 ## Local Development
 
 ```bash
-git clone https://github.com/domdomegg/computer-use-mcp.git
+git clone https://github.com/CypherPotato/computer-use-mcp.git
 cd computer-use-mcp
 npm install
 npm run build

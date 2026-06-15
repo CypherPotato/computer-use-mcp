@@ -1,17 +1,17 @@
 {
   "manifest_version": "0.3",
-  "name": "computer-use-mcp",
+  "name": "@cypherpotato/computer-use-mcp",
   "display_name": "Computer Use",
   "version": "{{VERSION}}",
-  "description": "💻 MCP server for Claude to control your computer. Implements computer use capabilities similar to Anthropic's official computer use guide.",
+  "description": "MCP server for AI clients to inspect and control the local desktop. Fork of domdomegg/computer-use-mcp with explicit sessions and structured responses.",
   "icon": "icon.png",
   "author": {
-    "name": "Adam Jones (domdomegg)",
-    "url": "https://github.com/domdomegg"
+    "name": "Gabriel Scatolin (CypherPotato), Adam Jones (domdomegg)",
+    "url": "https://github.com/CypherPotato"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/domdomegg/computer-use-mcp"
+    "url": "https://github.com/CypherPotato/computer-use-mcp"
   },
   "server": {
     "type": "node",
