@@ -188,10 +188,13 @@ describe.each([
 			});
 
 			expect(result.tools.map((t) => t.name)).toEqual([
-				'computer',
+				'get_context',
+				'focus_window',
+				'computer_toggle_session',
+				'computer_use',
 			]);
 			expect(result.tools[0]).toMatchObject({
-				name: 'computer',
+				name: 'get_context',
 				description: expect.any(String),
 				inputSchema: expect.objectContaining({
 					type: 'object',
